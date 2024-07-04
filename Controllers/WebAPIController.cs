@@ -14,7 +14,8 @@ namespace WebApplication1.Controllers
             return new List<Villa>
             {
                 new Villa{Id=1,Name="Pool View"},
-                new Villa{Id=2,Name="Beach View"}
+                new Villa{Id=2,Name="Beach View"},
+                new Villa{Id=3,Name="AirBnb"}
             };
         }
     }
