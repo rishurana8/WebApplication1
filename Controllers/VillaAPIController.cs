@@ -38,5 +38,22 @@ namespace WebApplication1.Controllers
             }
             return Ok(villa); 
         }
+
+        // as when we are dealing with http we get object from body so we will write it in [FromBody]
+        [HttpPost]
+        public ActionResult<VillaDTO> CreateVilla([FromBody] VillaDTO villaDTO)
+        {
+            if (villaDTO == null)
+            { 
+                return BadRequest(villaDTO);
+            }
+            if(villaDTO.Id > 0)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            villaDTO.Id = VillaStore.villaList.OrderByDescending(u => u.Id).FirstOrDefault().Id+1;
+            VillaStore.villaList.Add(villaDTO);
+            return Ok(villaDTO);
+        }
     }
 }
