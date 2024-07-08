@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data;
 using WebApplication1.Models;
 using WebApplication1.Models.Dto;
@@ -10,12 +11,19 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class VillaAPIController: ControllerBase
     {
+         private readonly ILogger<VillaAPIController> _logger;
+        public VillaAPIController(ILogger<VillaAPIController>logger)
+        {
+            _logger = logger;
+        }
+
         [HttpGet]
         // http end point to get all the villas 
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<VillaDTO>> GetVillas()
         {
-
+            // Here using logger we can get information from the logger
+            _logger.LogInformation("Gettting all villas");
             return Ok(VillaStore.villaList);
         }
         
@@ -28,6 +36,7 @@ namespace WebApplication1.Controllers
             // addding authentication
             if (id == 0)
             {
+                _logger.LogError("Get Villa Error with Id" + id);
                 return BadRequest();
             }
             var  villa = (VillaStore.villaList.FirstOrDefault(u =>u.Id == id));
@@ -110,6 +119,27 @@ namespace WebApplication1.Controllers
             villa.Sqft = villaDTO.Sqft;
             villa.Occupancy = villaDTO.Occupancy;
 
+            return NoContent();
+        }
+    
+        public IActionResult UpadtePartialVilla(int id, JsonPatchDocument<VillaDTO> patchDTO)
+        {
+            if(patchDTO == null || id == 0)
+            {
+                return BadRequest();
+            }
+
+            var villa = VillaStore.villaList.FirstOrDefault(u=> u.Id == id);
+            if(villa == null){
+                return BadRequest();
+            }
+            // Erros will be stored in models object
+            patchDTO.ApplyTo(villa, ModelState);
+            // now if we got any error in modelstate we will return badrequest
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             return NoContent();
         }
     }
